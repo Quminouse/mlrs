@@ -26,7 +26,9 @@ impl<T: Copy> Matrix<T> {
 }
 
 // Multiplication
-impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::AddAssign> std::ops::Mul for Matrix<T> {
+impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::AddAssign>
+    std::ops::Mul for Matrix<T>
+{
     type Output = Matrix<T>;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -39,12 +41,14 @@ impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::Add
                     *dst.get_mut(i, j) += *self.get(i, k) * *rhs.get(k, j);
                 }
             }
-        }    
+        }
         dst
     }
 }
 
-impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::AddAssign> std::ops::MulAssign for Matrix<T> {
+impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::AddAssign>
+    std::ops::MulAssign for Matrix<T>
+{
     fn mul_assign(&mut self, rhs: Self) {
         assert!(self.cols == rhs.rows);
         let mut dst: Matrix<T> = Matrix::alloc(self.rows, rhs.cols);
@@ -55,7 +59,7 @@ impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::Add
                     *dst.get_mut(i, j) += *self.get(i, k) * *rhs.get(k, j);
                 }
             }
-        }    
+        }
     }
 }
 
@@ -66,20 +70,19 @@ impl<T: std::ops::Add<Output = T> + Copy> std::ops::Add for Matrix<T> {
     fn add(mut self, rhs: Self) -> Self::Output {
         assert!(rhs.rows == self.rows);
         assert!(rhs.cols == self.cols);
-        
+
         for i in 0..self.data.capacity() {
             self.data[i] = self.data[i] + rhs.data[i];
         }
         self
     }
-
 }
 
 impl<T: std::ops::Add<Output = T> + Copy> std::ops::AddAssign for Matrix<T> {
     fn add_assign(&mut self, rhs: Self) {
         assert!(rhs.rows == self.rows);
         assert!(rhs.cols == self.cols);
-        
+
         for i in 0..self.data.capacity() {
             self.data[i] = self.data[i] + rhs.data[i];
         }
@@ -92,18 +95,15 @@ impl<T: std::fmt::Debug + Copy> std::fmt::Debug for Matrix<T> {
         writeln!(f, "")?;
         writeln!(f, "Rows: {}", self.rows)?;
         writeln!(f, "Cols: {}", self.cols)?;
-        
+
         write!(f, "[ ")?;
         for (i, x) in self.data.iter().enumerate() {
-            write!(f, "{:.2?}", x)?; 
+            write!(f, "{:.2?}", x)?;
             if (i + 1) == self.data.capacity() {
                 write!(f, " ]")?;
-            }
-            else if (i + 1) % self.cols == 0 {
+            } else if (i + 1) % self.cols == 0 {
                 write!(f, "\n  ")?;
-            }
-            
-            else {
+            } else {
                 write!(f, ", ")?;
             }
         }
