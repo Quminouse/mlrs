@@ -17,6 +17,12 @@ impl<T: Copy> Matrix<T> {
             self.data.push(value);
         }
     }
+    pub fn get_mut(&mut self, row: usize, col: usize) -> &mut T {
+        &mut self.data[self.cols * row + col]
+    }
+    pub fn get(&self, row: usize, col: usize) -> &T {
+        &self.data[self.cols * row + col]
+    }
 }
 
 // Multiplication
@@ -30,7 +36,7 @@ impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::Add
         for i in 0..dst.rows {
             for j in 0..dst.cols {
                 for k in 0..self.cols {
-                    dst.data[self.cols * i + j] += self.data[self.cols * i + k] * rhs.data[rhs.cols * k + j];
+                    *dst.get_mut(i, j) += *self.get(i, k) * *rhs.get(k, j);
                 }
             }
         }    
@@ -46,7 +52,7 @@ impl<T: std::ops::Mul<Output = T> + Copy + std::default::Default + std::ops::Add
         for i in 0..dst.rows {
             for j in 0..dst.cols {
                 for k in 0..self.cols {
-                    dst.data[self.cols * i + j] += self.data[self.cols * i + k] * rhs.data[rhs.cols * k + j];
+                    *dst.get_mut(i, j) += *self.get(i, k) * *rhs.get(k, j);
                 }
             }
         }    
