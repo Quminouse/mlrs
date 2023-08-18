@@ -1,3 +1,5 @@
+use rand::{Rng, prelude::Distribution, distributions::Standard};
+
 pub struct Matrix<T> {
     rows: usize,
     cols: usize,
@@ -13,15 +15,26 @@ impl<T: Copy> Matrix<T> {
         }
     }
     pub fn fill(&mut self, value: T) {
+        self.data.clear();
         for _ in 0..self.data.capacity() {
             self.data.push(value);
         }
     }
-    pub fn get_mut(&mut self, row: usize, col: usize) -> &mut T {
+    fn get_mut(&mut self, row: usize, col: usize) -> &mut T {
         &mut self.data[self.cols * row + col]
     }
-    pub fn get(&self, row: usize, col: usize) -> &T {
+    fn get(&self, row: usize, col: usize) -> &T {
         &self.data[self.cols * row + col]
+    }
+}
+
+impl <T: Copy> Matrix<T> where Standard: Distribution<T> {
+    pub fn rand(&mut self) {
+        self.data.clear();
+        let mut rng = rand::thread_rng();
+        for _ in 0..self.data.capacity() {
+            self.data.push(rng.gen());
+        }
     }
 }
 
@@ -93,20 +106,14 @@ impl<T: std::ops::Add<Output = T> + Copy> std::ops::AddAssign for Matrix<T> {
 impl<T: std::fmt::Debug + Copy> std::fmt::Debug for Matrix<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "")?;
-        writeln!(f, "Rows: {}", self.rows)?;
-        writeln!(f, "Cols: {}", self.cols)?;
-
         write!(f, "[ ")?;
         for (i, x) in self.data.iter().enumerate() {
-            write!(f, "{:.2?}", x)?;
+            write!(f, "{:.2?} ", x)?;
             if (i + 1) == self.data.capacity() {
-                write!(f, " ]")?;
+                write!(f, "]")?;
             } else if (i + 1) % self.cols == 0 {
                 write!(f, "\n  ")?;
-            } else {
-                write!(f, ", ")?;
-            }
-        }
+            }         }
         Ok(())
     }
 }
