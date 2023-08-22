@@ -96,9 +96,9 @@ impl<T: std::ops::Add<Output = T> + Copy> std::ops::Add for Matrix<T> {
         assert!(rhs.rows == self.rows);
         assert!(rhs.cols == self.cols);
 
-        self.iter_mut().zip(rhs.iter()).for_each(|(x, y)| {
-            *x = *x + *y
-        });
+        self.iter_mut()
+            .zip(rhs.iter())
+            .for_each(|(x, y)| *x = *x + *y);
         self
     }
 }
@@ -108,9 +108,9 @@ impl<T: std::ops::Add<Output = T> + Copy> std::ops::AddAssign for Matrix<T> {
         assert!(rhs.rows == self.rows);
         assert!(rhs.cols == self.cols);
 
-        self.iter_mut().zip(rhs.iter()).for_each(|(x, y)| {
-            *x = *x + *y
-        });
+        self.iter_mut()
+            .zip(rhs.iter())
+            .for_each(|(x, y)| *x = *x + *y);
     }
 }
 
