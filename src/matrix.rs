@@ -1,6 +1,6 @@
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Matrix<T> {
     rows: usize,
     cols: usize,
@@ -27,7 +27,7 @@ impl<T: Clone + Copy + Default> Matrix<T> {
         &self.data[self.cols * row + col]
     }
 
-    pub fn alloc(rows: usize, cols: usize) -> Self {
+    pub fn new(rows: usize, cols: usize) -> Self {
         Matrix {
             rows,
             cols,
@@ -35,9 +35,9 @@ impl<T: Clone + Copy + Default> Matrix<T> {
         }
     }
 
-    pub fn fill(&mut self, value: &T) {
+    pub fn fill(&mut self, value: T) {
         for i in self.iter_mut() {
-            *i = *value;
+            *i = value;
         }
     }
 
@@ -59,7 +59,7 @@ impl<T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Default + Clone 
 
     fn mul(self, rhs: Self) -> Self::Output {
         assert!(self.cols == rhs.rows);
-        let mut dst: Matrix<T> = Matrix::alloc(self.rows, rhs.cols);
+        let mut dst: Matrix<T> = Matrix::new(self.rows, rhs.cols);
         for i in 0..dst.rows {
             for j in 0..dst.cols {
                 for k in 0..self.cols {
@@ -76,7 +76,7 @@ impl<T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Default + Clone 
 {
     fn mul_assign(&mut self, rhs: Self) {
         assert!(self.cols == rhs.rows);
-        let mut dst: Matrix<T> = Matrix::alloc(self.rows, rhs.cols);
+        let mut dst: Matrix<T> = Matrix::new(self.rows, rhs.cols);
         for i in 0..dst.rows {
             for j in 0..dst.cols {
                 for k in 0..self.cols {
@@ -115,12 +115,6 @@ impl<T: std::ops::Add<Output = T> + Copy> std::ops::AddAssign for Matrix<T> {
 }
 
 // Debug
-impl<T: std::fmt::Debug> std::fmt::Debug for Matrix<T> {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        dbg!(&self.data);
-        Ok(())
-    }
-}
 impl<T: std::fmt::Display> std::fmt::Display for Matrix<T> {
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         if self.data.capacity() == 0 {
