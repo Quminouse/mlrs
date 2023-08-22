@@ -2,7 +2,7 @@ use crate::matrix::Matrix;
 
 impl Matrix<f32> {
     pub fn sigmoid(&mut self) {
-        let _ = self.iter_mut().map(|x| {
+        self.iter_mut().for_each(|x| {
             *x = sigmoid(*x);
         });
     }

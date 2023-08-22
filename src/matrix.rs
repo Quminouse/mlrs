@@ -16,7 +16,7 @@ impl<T> Matrix<T> {
     }
 }
 
-impl<T: Clone + Copy> Matrix<T> {
+impl<T: Clone + Copy + Default> Matrix<T> {
     pub fn get_mut(&mut self, row: usize, col: usize) -> &mut T {
         assert!(self.data.len() > self.cols * row + col);
         &mut self.data[self.cols * row + col]
@@ -31,7 +31,7 @@ impl<T: Clone + Copy> Matrix<T> {
         Matrix {
             rows,
             cols,
-            data: Vec::with_capacity(rows * cols),
+            data: vec![Default::default(); rows * cols],
         }
     }
 
@@ -96,8 +96,8 @@ impl<T: std::ops::Add<Output = T> + Copy> std::ops::Add for Matrix<T> {
         assert!(rhs.rows == self.rows);
         assert!(rhs.cols == self.cols);
 
-        let _ = self.iter_mut().zip(rhs.iter()).map(|(x, y)| {
-            *x = *x + *y;
+        self.iter_mut().zip(rhs.iter()).for_each(|(x, y)| {
+            *x = *x + *y
         });
         self
     }
@@ -108,23 +108,33 @@ impl<T: std::ops::Add<Output = T> + Copy> std::ops::AddAssign for Matrix<T> {
         assert!(rhs.rows == self.rows);
         assert!(rhs.cols == self.cols);
 
-        let _ = self.iter_mut().zip(rhs.iter()).map(|(x, y)| {
-            *x = *x + *y;
+        self.iter_mut().zip(rhs.iter()).for_each(|(x, y)| {
+            *x = *x + *y
         });
     }
 }
 
 // Debug
 impl<T: std::fmt::Debug> std::fmt::Debug for Matrix<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "")?;
-        write!(f, "[ ")?;
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        dbg!(&self.data);
+        Ok(())
+    }
+}
+impl<T: std::fmt::Display> std::fmt::Display for Matrix<T> {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        if self.data.capacity() == 0 {
+            println!("[]");
+            return Ok(());
+        }
+        println!("");
+        print!("[ ");
         for (i, x) in self.iter().enumerate() {
-            write!(f, "{:.2?} ", x)?;
-            if (i + 1) == self.data.capacity() {
-                write!(f, "]")?;
+            print!("{:.2} ", x);
+            if (i + 1) >= self.data.capacity() {
+                print!("]");
             } else if (i + 1) % self.cols == 0 {
-                write!(f, "\n  ")?;
+                print!("\n  ");
             }
         }
         Ok(())
