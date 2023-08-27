@@ -58,7 +58,12 @@ impl<T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Default + Clone 
     type Output = Matrix<T>;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        assert!(self.cols == rhs.rows);
+        assert!(
+            self.cols == rhs.rows,
+            "LHS.cols: {} != RHS.rows: {}",
+            self.cols,
+            rhs.rows
+        );
         let mut dst: Matrix<T> = Matrix::new(self.rows, rhs.cols);
         for i in 0..dst.rows {
             for j in 0..dst.cols {

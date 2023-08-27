@@ -19,7 +19,7 @@ struct Layer {
 }
 
 impl Layer {
-    fn new(prev: usize, current: usize) -> Self {
+    pub fn new(prev: usize, current: usize) -> Self {
         let mut weights = Matrix::new(current, prev);
         let mut biases = Matrix::new(current, 1);
         weights.fill(0.0);
@@ -27,12 +27,15 @@ impl Layer {
 
         Layer { weights, biases }
     }
+    fn activate(&self, activation: Matrix<f32>) -> Matrix<f32> {
+        return (self.weights.clone() * activation.clone()) + self.biases.clone();
+    }
 }
 
 impl std::fmt::Display for Layer {
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            println!("Weights:{}", self.weights);
-            println!("Biases:{}", self.biases);
+        println!("Weights: {}", self.weights);
+        println!("Biases:  {}", self.biases);
         Ok(())
     }
 }
@@ -40,7 +43,6 @@ impl std::fmt::Display for Layer {
 #[derive(Debug)]
 pub struct NN {
     data: Vec<Layer>,
-    sizes: Vec<usize>,
 }
 
 impl NN {
@@ -52,11 +54,26 @@ impl NN {
                 Some(m) => {
                     data.push(Layer::new(*n, **m));
                 }
-                None => {
-                }
+                None => {}
             }
         }
-        NN { data, sizes }
+        NN { data }
+    }
+    pub fn activate(&self, mut input: Matrix<f32>) -> Matrix<f32> {
+        for i in self.data.iter() {
+            input = i.activate(input);
+        }
+        return input;
+    }
+    pub fn fill_weights(&mut self, value: f32) {
+        for layer in self.data.iter_mut() {
+            layer.weights.fill(value);
+        }
+    }
+    pub fn fill_biases(&mut self, value: f32) {
+        for layer in self.data.iter_mut() {
+            layer.biases.fill(value);
+        }
     }
 }
 
