@@ -1,15 +1,15 @@
 use mlrs::{matrix::Matrix, nn::NN};
 
 fn main() {
-    let mut nn = NN::new(vec![2, 2, 1]);
-    let mut activation = Matrix::new(2, 1);
+    #[rustfmt::skip]
+    let xor_model: Matrix<f32> = Matrix::from_vec(4, 3, vec![
+        1.0, 1.0, 1.0, 
+        1.0, 1.0, 0.0, 
+        1.0, 0.0, 1.0, 
+        0.0, 0.0, 0.0,
+    ]).unwrap();
 
-    nn.fill_weights(0.5);
-    nn.fill_biases(1.0);
-
-    activation.fill(1.0);
-
-    println!("{}", nn);
-
-    println!("{}", nn.activate(activation));
+    let mut nn = NN::new(vec![2, 2, 1]).unwrap();
+    nn.rand();
+    nn.test_model(xor_model).unwrap();
 }

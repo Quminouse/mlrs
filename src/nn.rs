@@ -1,4 +1,4 @@
-use crate::matrix::Matrix;
+use crate::matrix::{Matrix, MatrixError};
 use rand;
 
 impl Matrix<f32> {
@@ -25,14 +25,15 @@ struct Layer {
 }
 
 impl Layer {
-    pub fn new(prev: usize, current: usize) -> Self {
-        Layer {
-            weights: Matrix::new(current, prev),
-            biases: Matrix::new(current, 1),
-        }
+    pub fn new(prev: usize, current: usize) -> Result<Self, MatrixError> {
+        let weights = Matrix::new(current, prev)?;
+        let biases = Matrix::new(current, 1)?;
+        return Ok(Layer { weights, biases });
     }
     fn activate(&self, activation: Matrix<f32>) -> Matrix<f32> {
-        return (self.weights.clone() * activation.clone()) + self.biases.clone();
+        let mut result = (self.weights.clone() * activation.clone()) + self.biases.clone();
+        result.sigmoid();
+        return result;
     }
 }
 
@@ -50,34 +51,50 @@ pub struct NN {
 }
 
 impl NN {
-    pub fn new(sizes: Vec<usize>) -> NN {
+    pub fn new(sizes: Vec<usize>) -> Result<NN, MatrixError> {
         let mut data = Vec::with_capacity(sizes.len());
         let mut iter = sizes.iter().peekable();
         while let Some(n) = iter.next() {
             match iter.peek() {
                 Some(m) => {
-                    data.push(Layer::new(*n, **m));
+                    data.push(Layer::new(*n, **m)?);
                 }
                 None => {}
             }
         }
-        NN { data }
+        Ok(NN { data })
     }
-    pub fn activate(&self, mut input: Matrix<f32>) -> Matrix<f32> {
+    fn activate(&self, mut input: Matrix<f32>) -> Matrix<f32> {
         for i in self.data.iter() {
             input = i.activate(input);
         }
         return input;
     }
-    pub fn fill_weights(&mut self, value: f32) {
-        self.data.iter_mut().for_each(|x| {
-            x.weights.fill(value);
-        });
+    pub fn rand(&mut self) {
+        for i in self.data.iter_mut() {
+            for j in i.weights.iter_mut() {
+                *j = rand::random();
+            }
+            for j in i.biases.iter_mut() {
+                *j = rand::random();
+            }
+        }
     }
-    pub fn fill_biases(&mut self, value: f32) {
-        self.data.iter_mut().for_each(|x| {
-            x.biases.fill(value);
-        });
+
+    pub fn test_model(&self, model: Matrix<f32>) -> Result<(), MatrixError> {
+        let input_layer = &self.data[0];
+        let rows = input_layer.weights.rows() + 1;
+        assert!(model.size() % rows == 0);
+        for (i, mut j) in model.row_chunks().enumerate() {
+            j = &j[1..];
+            println!(
+                "Case {}:\n\tResult: {}\n\tExpected: {}",
+                i,
+                self.activate(Matrix::from_vec(rows - 1, 1, (*j).to_vec()).unwrap()),
+                j[0],
+            );
+        }
+        return Ok(());
     }
 }
 
